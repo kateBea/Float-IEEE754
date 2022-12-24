@@ -109,7 +109,7 @@ int main() {
     std::cin >> num;
     constexpr std::uint32_t bit_length{ 32 };
 
-    std::array<std::int8_t, bit_length> float_bits{ 1, 0, 1, 1, 1, 0, 0, 1 };
+    std::array<std::int8_t, bit_length> float_bits{};
 
     get_float(num, float_bits);
 
