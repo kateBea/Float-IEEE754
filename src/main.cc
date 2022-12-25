@@ -16,13 +16,14 @@ static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::uint32_t g_length{ 32 };
 
 auto to_hex(std::uint32_t num) -> std::string {
-    static const char* rep[] { "1", "2", "3", "4", "5", "6", "7", "8", "9"
+    static const char* rep[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
                         "A", "B", "C", "D", "E", "F", };
     if (num < 16)
         return std::string(rep[num % 16]);
 
+    std::cout << std::endl;
     std::string res{ std::move(to_hex(num / 16)) };
-    return res + std::string(rep[num % 16]);
+    return res + std::string(rep[num % (16 - 1)]);
 }
 
 template <typename std::size_t size_>
@@ -153,11 +154,13 @@ auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::strin
             ++placement;
         }
 
-        for ( ; counter < g_mantissa_length ; ++it_dec, ++counter) {
+        for ( ; counter < g_mantissa_length ; ++counter) {
             if (it_dec == dec_str.end())
                 result += "0";
-            else
+            else {
                 result += *it_dec;
+                ++it_dec;
+            }
         }
 
         exponent = g_offset - placement;
@@ -223,7 +226,7 @@ int main() {
     std::array<char, g_length> float_bits{};
 
     get_float(num, float_bits);
-
+    std::cout << "63 is hexa" << to_hex(63) << std::endl;
 #if 1
     print(float_bits);
 #endif
