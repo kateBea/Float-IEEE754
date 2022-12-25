@@ -15,20 +15,41 @@ static constexpr std::size_t g_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::uint32_t g_length{ 32 };
 
+auto to_hex(std::uint32_t num) -> std::string {
+    static const char* rep[] { "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                        "A", "B", "C", "D", "E", "F", };
+    if (num < 16)
+        return std::string(rep[num % 16]);
+
+    std::string res{ std::move(to_hex(num / 16)) };
+    return res + std::string(rep[num % 16]);
+}
+
 template <typename std::size_t size_>
-auto print(const std::array<std::int8_t, size_>& bits) {
-    auto two_power{ [&bits](const std::int32_t acc, std::int8_t curr) -> auto {
+auto print(const std::array<char, size_>& bits) {
+    auto two_power{ [&bits](const std::int32_t acc, char curr) -> auto {
             // begin() holds the most significant bit
-            static std::int32_t exponent{ bits.size() - 1};
-            std::int32_t result{ acc + static_cast<std::int32_t>(curr) *
-                static_cast<std::int32_t>(std::pow(2, exponent)) };
+            static auto exponent{ static_cast<std::int32_t>(bits.size() - 1) };
+            auto result{ static_cast<std::int32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
+                static_cast<std::uint32_t>(std::pow(2, exponent))) };
             --exponent;
             return result;
         }
     };
 
-    auto temp{ std::accumulate(bits.begin(), bits.end(), 0, two_power) };
-    std::cout << std::ios::hex << std::uppercase << "Value hex: 0x" << temp << std::endl;
+    std::cout << "sign bit (s)" << "   " <<"exponent bits (s)" << "   " << "    mantissa bit (s)   " << std::endl;
+    std::cout << "------------" << "   " <<"-----------------" << "   " << "-----------------------" << std::endl;
+    std::cout << "    ";
+    std::for_each(bits.begin(), bits.begin() + 1, [](char ch) { std::cout << ch;});
+    std::cout << "               ";
+    std::for_each(bits.begin() + 1, bits.begin() + 9, [](char ch) { std::cout << ch;});
+    std::cout << "       ";
+    std::for_each(bits.begin() + 9, bits.end(), [](char ch) { std::cout << ch;});
+    std::cout << "\n----------------------------------------------------------\n";
+
+    // not properly showing hexadecimal representation
+    auto temp{ static_cast<std::uint32_t>(std::accumulate(bits.begin(), bits.end(), 0, two_power)) };
+    std::cout << "Value hex: 0x" << temp << std::ios::hex << std::endl;
     std::cout << "Value bin: 0b" << std::bitset<32>{ temp } << std::endl;
 }
 
@@ -90,19 +111,16 @@ auto bin_decimal_part(std::int32_t dec) -> std::string {
     return result;
 }
 
-auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::string, int> {
-    constexpr std::int32_t g_offset{ 127 };
+auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::string, std::int32_t> {
     std::string result{ "1." };
 
-    std::int32_t exponent{ bin_whole_part(whole).size() - 1 };
+    std::int32_t exponent{ static_cast<std::int32_t>(bin_whole_part(whole).size()) - 1 };
     auto whole_str{ bin_whole_part(whole) };
     auto dec_str{ bin_decimal_part(decimal) };
-    std::cout << "exponent float ieee754: " << exponent << std::endl;
-    std::cout << "whole part bin: " << whole_str << std::endl;
-    std::cout << "decimal part bin: " << dec_str << std::endl;
 
+    // first bit from whole part is 1
     auto it_whole{ whole_str.begin()++ };
-    auto it_dec{ dec_str.begin()++ };
+    auto it_dec{ dec_str.begin() };
 
     // used to make sure the mantisa is 23 bits long
     std::size_t counter{ 0 };
@@ -123,8 +141,23 @@ auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::strin
     }
     else {
         std::size_t placement{};
+
+        if (*it_dec == '1') {
+            ++it_dec;
+            placement = 1;
+        }
+
         for ( ; it_dec != dec_str.end() and counter < g_mantissa_length and *it_dec != '1'; ++it_dec) {
+            result += *it_dec;
+            ++counter;
             ++placement;
+        }
+
+        for ( ; counter < g_mantissa_length ; ++it_dec, ++counter) {
+            if (it_dec == dec_str.end())
+                result += "0";
+            else
+                result += *it_dec;
         }
 
         exponent = g_offset - placement;
@@ -144,8 +177,13 @@ auto print(const std::array<char, size_>& bits, std::size_t start, std::size_t e
 }
 
 template <typename std::size_t size_>
-auto get_float(const std::string& number, std::array<char, size_>& bits) -> void {
+auto get_float(const std::string& p_number, std::array<char, size_>& bits) -> void {
+    auto number{ p_number };
     bool is_negative{ number < 0.0f };
+
+    // get rid of sign
+    if (is_negative)
+        number.erase(0, 1);
 
     // Normalized value. norm.first constaints the binary value
     // norm.second contains the value of biased exponent
@@ -157,7 +195,7 @@ auto get_float(const std::string& number, std::array<char, size_>& bits) -> void
 
     auto exponent_str{ bin_whole_part(norm.second) };
 
-    while (exponent_str.size() <= 8)
+    while (exponent_str.size() < 8)
         // sign extension to fill remaining bits
         exponent_str.insert(0, 1, norm.second < 0 ? '1' : '0');
 
@@ -186,9 +224,7 @@ int main() {
 
     get_float(num, float_bits);
 
-
-
-#if 0
+#if 1
     print(float_bits);
 #endif
     return 0;
