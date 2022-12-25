@@ -15,24 +15,23 @@ static constexpr std::size_t g_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::uint32_t g_length{ 32 };
 
-auto to_hex(std::uint32_t num) -> std::string {
+auto to_hex(std::uint64_t num) -> std::string {
     static const char* rep[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
                         "A", "B", "C", "D", "E", "F", };
     if (num < 16)
-        return std::string(rep[num % 16]);
+        return std::string(rep[num % 15]);
 
-    std::cout << std::endl;
     std::string res{ std::move(to_hex(num / 16)) };
-    return res + std::string(rep[(num % 16) - 1]);
+    return res + std::string(rep[num % 15]);
 }
 
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
-    auto two_power{ [&bits](const std::int32_t acc, char curr) -> auto {
+    auto two_power{ [&bits](const std::int64_t acc, char curr) -> auto {
             // begin() holds the most significant bit
-            static auto exponent{ static_cast<std::int32_t>(bits.size() - 1) };
-            auto result{ static_cast<std::int32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
-                static_cast<std::uint32_t>(std::pow(2, exponent))) };
+            static auto exponent{ static_cast<std::int64_t>(bits.size() - 1) };
+            auto result{ static_cast<std::int64_t>(acc + static_cast<std::uint64_t>(curr - '0') *
+                static_cast<std::uint64_t>(std::pow(2, exponent))) };
             --exponent;
             return result;
         }
@@ -49,7 +48,7 @@ auto print(const std::array<char, size_>& bits) {
     std::cout << "\n----------------------------------------------------------\n";
 
     // not properly showing hexadecimal representation
-    auto temp{ static_cast<std::uint32_t>(std::accumulate(bits.begin(), bits.end(), 0, two_power)) };
+    auto temp{ static_cast<std::uint64_t>(std::accumulate(bits.begin(), bits.end(), 0, two_power)) };
     std::cout << "Value hex: 0x" << to_hex(temp) << std::ios::hex << std::endl;
     std::cout << "Value bin: 0b" << std::bitset<32>{ temp } << std::endl;
 }
