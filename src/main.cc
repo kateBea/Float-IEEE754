@@ -119,7 +119,6 @@ auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::strin
     auto whole_str{ bin_whole_part(whole) };
     auto dec_str{ bin_decimal_part(decimal) };
 
-    // first bit from whole part is 1
     auto it_whole{ whole_str.begin()++ };
     auto it_dec{ dec_str.begin() };
 
