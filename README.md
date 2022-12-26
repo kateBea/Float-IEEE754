@@ -1,4 +1,4 @@
-# Float IEEE754
+# Float IEEE-754 Converter
 Small program to get binary representation of a 32 bits float in IEEE-754 format.
 
 # Example building and execution on linux:
