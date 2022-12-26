@@ -15,7 +15,7 @@ static constexpr std::size_t g_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::uint32_t g_length{ 32 };
 
-auto to_hex(std::uint64_t num) -> std::string {
+auto to_hex(std::uint32_t num) -> std::string {
     static const char* rep[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
                         "A", "B", "C", "D", "E", "F", };
     if (num < 16)
@@ -29,19 +29,20 @@ template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
     auto two_power{ [&bits](const std::int64_t acc, char curr) -> auto {
             // begin() holds the most significant bit
-            static auto exponent{ static_cast<std::int64_t>(bits.size() - 1) };
-            auto result{ static_cast<std::int64_t>(acc + static_cast<std::uint64_t>(curr - '0') *
-                static_cast<std::uint64_t>(std::pow(2, exponent))) };
+            static auto exponent{ static_cast<std::uint32_t>(bits.size() - 1) };
+            auto result{ static_cast<std::uint32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
+                static_cast<std::uint32_t>(std::pow(2, exponent))) };
             --exponent;
             return result;
         }
     };
 
+    std::cout << "\n----------------------------------------------------------\n";
     std::cout << "sign bit (s)" << "   " <<"exponent bits (s)" << "   " << "    mantissa bit (s)   " << std::endl;
     std::cout << "------------" << "   " <<"-----------------" << "   " << "-----------------------" << std::endl;
-    std::cout << "    ";
+    std::cout << "      ";
     std::for_each(bits.begin(), bits.begin() + 1, [](char ch) { std::cout << ch;});
-    std::cout << "               ";
+    std::cout << "             ";
     std::for_each(bits.begin() + 1, bits.begin() + 9, [](char ch) { std::cout << ch;});
     std::cout << "       ";
     std::for_each(bits.begin() + 9, bits.end(), [](char ch) { std::cout << ch;});
@@ -49,8 +50,8 @@ auto print(const std::array<char, size_>& bits) {
 
     // not properly showing hexadecimal representation
     auto temp{ static_cast<std::uint64_t>(std::accumulate(bits.begin(), bits.end(), 0, two_power)) };
-    std::cout << "Value hex: 0x" << to_hex(temp) << std::ios::hex << std::endl;
-    std::cout << "Value bin: 0b" << std::bitset<32>{ temp } << std::endl;
+    std::cout << "Hexadecimal representation: 0x" << to_hex(temp) << std::endl;
+    std::cout << "Binary representation:      0b" << std::bitset<32>{ temp } << std::endl;
 }
 
 auto whole(const std::string& number) -> std::int32_t {
@@ -179,7 +180,7 @@ auto print(const std::array<char, size_>& bits, std::size_t start, std::size_t e
 }
 
 template <typename std::size_t size_>
-auto get_float(const std::string& p_number, std::array<char, size_>& bits) -> void {
+auto get_bits(const std::string& p_number, std::array<char, size_>& bits) -> void {
     auto number{ p_number };
     bool is_negative{ number < 0.0f };
 
@@ -209,7 +210,7 @@ auto get_float(const std::string& p_number, std::array<char, size_>& bits) -> vo
         bits[index + 1] = exponent_str[index];
     }
 
-#if true
+#if false
     // print stuff
     std::cout << "normalized value: " << norm.first << std::endl;
     print(bits, 0, 0, "sign bit (s): ");
@@ -222,12 +223,15 @@ int main() {
     std::string num{};
     std::cout << "Value: ";
     std::cin >> num;
-    std::array<char, g_length> float_bits{};
+    std::array<char, g_length> bits{};
 
-    get_float(num, float_bits);
+    get_bits(num, bits);
 
-#if 1
-    print(float_bits);
+#if true
+    print(bits);
 #endif
+
+    std::cout << std::endl;
+    
     return 0;
 }
