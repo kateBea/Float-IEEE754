@@ -1,17 +1,17 @@
 /**
  * @file temporaryTests.cc
- * @author ya boy
+ * @author kt
  * @brief
- * @version 0.1
- * @date 2022-10-24
+ * @version 1.0
+ * @date 2022-12-27
  *
  * @copyright Copyright (c) 2022
- * @category Helping
+ * @category Tests
  *
  */
 
 /**
- * @brief Your code below. Don't change anything above line 17
+ * @brief IEEE-754 single precision float converter tool.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 
@@ -25,12 +25,9 @@
 #include <algorithm>
 #include <cmath>
 
-// IEEE-754 float (32 bits) conversion
-// cpp20 required for std::accumulate...
-
 static constexpr std::size_t g_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
-static constexpr std::uint32_t g_length{ 32 };
+static constexpr std::size_t g_length{ 32 };
 
 // returns the hexadecimal representation of a given number
 auto to_hex(std::uint32_t num) -> std::string {
@@ -210,7 +207,6 @@ auto get_bits(const std::string& p_number, std::array<char, size_>& bits) -> voi
     auto number{ p_number };
     bool is_negative{ number < 0.0f };
 
-    // get rid of sign
     if (is_negative)
         number.erase(0, 1);
 
@@ -232,9 +228,9 @@ auto get_bits(const std::string& p_number, std::array<char, size_>& bits) -> voi
     bits[0] = is_negative ? '1' : '0';
 
     // exponent bits
-    for (std::size_t index{}; index < 8; ++index) {
+    for (std::size_t index{}; index < 8; ++index) 
         bits[index + 1] = exponent_str[index];
-    }
+    
 
 #if false
     // print stuff
