@@ -1,3 +1,20 @@
+/**
+ * @file temporaryTests.cc
+ * @author ya boy
+ * @brief
+ * @version 0.1
+ * @date 2022-10-24
+ *
+ * @copyright Copyright (c) 2022
+ * @category Helping
+ *
+ */
+
+/**
+ * @brief Your code below. Don't change anything above line 17
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ */
+
 #include <array>
 #include <cstdint>
 #include <numeric>
@@ -15,6 +32,7 @@ static constexpr std::size_t g_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::uint32_t g_length{ 32 };
 
+// returns the hexadecimal representation of a given number
 auto to_hex(std::uint32_t num) -> std::string {
     static const char* rep[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
                         "A", "B", "C", "D", "E", "F", };
@@ -25,6 +43,7 @@ auto to_hex(std::uint32_t num) -> std::string {
     return res + std::string(rep[num % 15]);
 }
 
+// prints formatted output to the standard channel 
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
     auto two_power{ [&bits](const std::int64_t acc, char curr) -> auto {
@@ -54,6 +73,7 @@ auto print(const std::array<char, size_>& bits) {
     std::cout << "Binary representation:      0b" << std::bitset<32>{ temp } << std::endl;
 }
 
+// returns the integer part of a floating point number
 auto whole(const std::string& number) -> std::int32_t {
     std::string result{};
     auto it{ number.begin() };
@@ -64,6 +84,7 @@ auto whole(const std::string& number) -> std::int32_t {
     return std::stoi(result);
 }
 
+// returns the fractional part of a floating point number
 auto decimal(const std::string& number) -> std::int32_t {
     std::string result{};
     auto it{ number.begin() };
@@ -85,6 +106,8 @@ auto operator<(const std::string& rhs, float lhs) -> bool {
     return std::stof(rhs) < lhs;
 }
 
+// Returns the binary representation of whole
+// which is expected to be the integer part of a floating point number
 auto bin_whole_part(std::int32_t whole) -> std::string {
     if (whole == 0)
         return std::string{ "0" };
@@ -95,6 +118,8 @@ auto bin_whole_part(std::int32_t whole) -> std::string {
     return res + std::to_string(whole % 2);
 }
 
+// Returns the binary representation of dec
+// which is expected to be the fractional part of a floating point number
 auto bin_decimal_part(std::int32_t dec) -> std::string {
     float temp{ std::stof("0." + std::to_string(dec)) };
     std::string result{};
@@ -168,6 +193,8 @@ auto normalize(std::int32_t whole, std::int32_t decimal) -> std::pair<std::strin
     return std::make_pair(result, exponent);
 }
 
+// outputs the contents of a vector between two indices
+// both are expected to be valid indices in the range [0, bits.size() - 1]
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits, std::size_t start, std::size_t end, const char* str) -> void {
     std::cout << str;
@@ -225,12 +252,7 @@ int main() {
     std::array<char, g_length> bits{};
 
     get_bits(num, bits);
-
-#if true
     print(bits);
-#endif
 
-    std::cout << std::endl;
-    
     return 0;
 }
