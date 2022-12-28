@@ -1,5 +1,5 @@
 /**
- * @file temporaryTests.cc
+ * @file main.cc
  * @author kt
  * @brief
  * @version 1.0
