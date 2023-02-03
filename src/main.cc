@@ -147,13 +147,15 @@ auto normalize(std::uint32_t whole, std::uint32_t decimal) -> std::pair<std::str
     switch (whole)
     {
     case 0:
-        
+        // TODO: shift coma to the right until we find a 1 (count steps), 
+        // e.g: 0.0010 -> first index of 1 is [2], exponent will be 127 + (-3) -> 1.0 * 2^(-3)
+        // look for std::string method that gives the first index of occorence of a char
         break;
     case 1:
-
+        // TODO: nothing to do really its already normalised
         break;
     default:
-    
+        // TODO: shift the comma till the first one and count the steps
         break;
     }
 
