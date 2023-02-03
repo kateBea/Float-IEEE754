@@ -20,7 +20,6 @@
 #include <iomanip>
 #include <string>
 #include <iostream>
-#include <exception>
 #include <algorithm>
 #include <bitset>
 #include <cmath>
