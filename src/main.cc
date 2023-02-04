@@ -21,6 +21,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
 #include <bitset>
 #include <cmath>
 
@@ -42,16 +43,7 @@ auto to_hex(std::uint32_t num) -> std::string {
 // prints formatted output to the standard channel 
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
-    auto two_power{ 
-        [&bits](const std::int64_t acc, char curr) -> auto {
-            // begin() holds the most significant bit
-            static auto exponent{ static_cast<std::uint32_t>(bits.size() - 1) };
-            auto result{ static_cast<std::uint32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
-                static_cast<std::uint32_t>(std::pow(2, exponent))) };
-            --exponent;
-            return result;
-        }
-    };
+
 
     std::cout << "\n----------------------------------------------------------\n";
     std::cout << "sign bit (s)" << "   " << "exponent bits (s)" << "   " << "    mantissa bit (s)   " << std::endl;
@@ -64,9 +56,8 @@ auto print(const std::array<char, size_>& bits) {
     std::for_each(bits.begin() + 9, bits.end(), [](char ch) { std::cout << ch; });
     std::cout << "\n----------------------------------------------------------\n";
 
-    // not properly showing hexadecimal representation
-    auto temp{ static_cast<std::uint32_t>(std::accumulate(bits.begin(), bits.end(), 0, two_power)) };
-    std::cout << "Hexadecimal representation: 0x" << to_hex(temp) << std::endl;
+    std::bitset<32> temp{ std::string{ bits.begin(), bits.end() } };
+    std::cout << std::hex << std::uppercase << "Hexadecimal representation: 0x" << temp.to_ulong() << std::endl;
     std::cout << "Binary representation:      0b" << std::bitset<32>{ temp } << std::endl;
 }
 
