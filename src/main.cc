@@ -20,7 +20,6 @@
 #include <iomanip>
 #include <string>
 #include <iostream>
-#include <exception>
 #include <algorithm>
 #include <bitset>
 #include <cmath>
@@ -43,14 +42,15 @@ auto to_hex(std::uint32_t num) -> std::string {
 // prints formatted output to the standard channel 
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
-    auto two_power{ [&bits](const std::int64_t acc, char curr) -> auto {
-        // begin() holds the most significant bit
-        static auto exponent{ static_cast<std::uint32_t>(bits.size() - 1) };
-        auto result{ static_cast<std::uint32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
-            static_cast<std::uint32_t>(std::pow(2, exponent))) };
-        --exponent;
-        return result;
-    }
+    auto two_power{ 
+        [&bits](const std::int64_t acc, char curr) -> auto {
+            // begin() holds the most significant bit
+            static auto exponent{ static_cast<std::uint32_t>(bits.size() - 1) };
+            auto result{ static_cast<std::uint32_t>(acc + static_cast<std::uint32_t>(curr - '0') *
+                static_cast<std::uint32_t>(std::pow(2, exponent))) };
+            --exponent;
+            return result;
+        }
     };
 
     std::cout << "\n----------------------------------------------------------\n";
