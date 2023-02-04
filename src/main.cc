@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <string>
 #include <iostream>
+#include <exception>
 #include <algorithm>
 #include <bitset>
 #include <cmath>
@@ -101,6 +102,7 @@ auto operator<(const std::string& rhs, float lhs) -> bool {
 
 // Returns the binary representation of whole
 // which is expected to be the integer part of a floating point number without the sign
+// the result will have no leading zeros
 auto bin_whole_part(std::uint32_t whole) -> std::string {
     if (whole == 0)
         return std::string{ "0" };
@@ -122,9 +124,9 @@ auto bin_decimal_part(std::uint32_t dec) -> std::string {
     for (std::size_t iter{}; iter < g_mantissa_length; ++iter) {
         temp = temp * 2.0f;
         if (temp < 1.0)
-            result.append("0");
+            result += '0';
         else {
-            result.append("1");
+            result += '1';
             temp = temp - 1.0f;
         }
     }
@@ -136,25 +138,35 @@ auto normalize(std::uint32_t whole, std::uint32_t decimal) -> std::pair<std::str
     std::int32_t exponent{ static_cast<std::int32_t>(bin_whole_part(whole).size()) - 1 };
     auto whole_str{ bin_whole_part(whole) };
     auto dec_str{ bin_decimal_part(decimal) };
+    std::string::size_type position{};
 
     // concatenate to obtain the binary representation f the floating point number
     // e.g.: 5.5 -> 101.1
-    std::string result{ std::move(whole_str + '.' + dec_str) };
+    std::string result{};
 
-    // There's three cases to account for: 0.xxx..., 1.xxx..., 1x.xxx... (numbers greater than 1)
+    // There's three cases to account for: 0.xxxx..., 1.xxxx..., 
+    // 1x.xxxx... (numbers greater than 1)
 
     switch (whole)
     {
     case 0:
-        // TODO: shift coma to the right until we find a 1 (count steps), 
-        // e.g: 0.0010 -> first index of 1 is [2], exponent will be 127 + (-3) -> 1.0 * 2^(-3)
-        // look for std::string method that gives the first index of occorence of a char
+        // case 0.xxxx...
+        position = dec_str.find('1');
+
+        // keep mantissa bits
+        dec_str.erase(0, position + 1);
+
+        result = std::move(dec_str);
+        exponent = g_exponent_offset + (-1 * static_cast<std::int32_t>(position + 1));
         break;
     case 1:
-        // TODO: nothing to do really its already normalised
+        // nothing to do really it's already normalised
+        result = std::move(dec_str);
+        exponent = static_cast<std::int32_t>(g_exponent_offset);
         break;
     default:
-        // TODO: shift the comma till the first one and count the steps
+        result = std::move(std::string(whole_str.begin() + 1, whole_str.end()) + dec_str);
+        exponent = g_exponent_offset + static_cast<std::int32_t>(whole_str.size() - 1);
         break;
     }
 
@@ -187,8 +199,6 @@ auto get_bits(std::string number, std::array<char, size_>& bits) -> void {
     // norm.second contains the value of biased exponent
     auto norm{ normalize(whole(number), decimal(number)) };
 
-    for (std::size_t index{}; index < g_mantissa_length; ++index) 
-        bits[bits.size() - 1 - index] = norm.first[norm.first.size() - 1 - index];
 
     auto exponent_str{ bin_whole_part(norm.second) };
 
@@ -196,8 +206,11 @@ auto get_bits(std::string number, std::array<char, size_>& bits) -> void {
         // sign extension to fill remaining bits
         exponent_str.insert(0, 1, norm.second < 0 ? '1' : '0');
 
-
     bits[0] = is_negative ? '1' : '0';
+
+    // mantissa bits. norm.first.size() <= g_mantissa_length
+    for (std::size_t index{}; index < norm.first.size(); ++index) 
+        bits[9 + index] = norm.first[index];
 
     // exponent bits
     for (std::size_t index{}; index < 8; ++index)
@@ -216,7 +229,7 @@ auto get_bits(std::string number, std::array<char, size_>& bits) -> void {
 int main() {
     // 5.77
     // correct: 01000000101110001010001111010111
-    // out:     01000000110111000101000111101011
+    // out:     01000000101110001010001111010111
     std::string num{};
     std::cout << "Value: ";
     std::cin >> num;
