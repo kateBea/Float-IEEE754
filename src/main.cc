@@ -160,16 +160,26 @@ auto normalize(std::uint32_t whole, std::uint32_t decimal) -> std::pair<std::str
         exponent = g_exponent_offset + (-1 * static_cast<std::int32_t>(position + 1));
         break;
     case 1:
+        // 1.xxxx...
         // nothing to do really it's already normalised
         result = std::move(dec_str);
         exponent = static_cast<std::int32_t>(g_exponent_offset);
         break;
     default:
+        // 1x.xxxx...
         result = std::move(std::string(whole_str.begin() + 1, whole_str.end()) + dec_str);
+
+        // to make sure the mantissa is 
+        // not longer than its max length
+        if (result.length() > g_mantissa_length)
+            // result[g_mantissa_length] is the first character
+            // out of the max allowed range, from that one, erase rest till 
+            // the end
+            result.erase(g_mantissa_length, result.size() - g_mantissa_length);
+
         exponent = g_exponent_offset + static_cast<std::int32_t>(whole_str.size() - 1);
         break;
     }
-
 
     return std::make_pair(result, exponent);
 }
@@ -226,7 +236,7 @@ auto get_bits(std::string number, std::array<char, size_>& bits) -> void {
 #endif
 }
 
-int main() {
+int main(int, char**) {
     // 5.77
     // correct: 01000000101110001010001111010111
     // out:     01000000101110001010001111010111
