@@ -29,17 +29,6 @@ static constexpr std::size_t g_exponent_offset{ 127 };
 static constexpr std::size_t g_mantissa_length{ 23 };
 static constexpr std::size_t g_length{ 32 };
 
-// returns the hexadecimal representation of a given number
-auto to_hex(std::uint32_t num) -> std::string {
-    static const char* rep[]{ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
-                        "A", "B", "C", "D", "E", "F", };
-    if (num < 16)
-        return std::string(rep[num % 15]);
-
-    std::string res{ std::move(to_hex(num / 16)) };
-    return res + std::string(rep[num % 15]);
-}
-
 // prints formatted output to the standard channel 
 template <typename std::size_t size_>
 auto print(const std::array<char, size_>& bits) {
